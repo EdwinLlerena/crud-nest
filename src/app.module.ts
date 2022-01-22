@@ -1,7 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import {
+  DB_DATABASE,
+  DB_HOST,
+  DB_PASSWORD,
+  DB_PORT,
+  DB_USER,
+} from './config/constants';
+import { ProductoModule } from './producto/producto.module';
 
 @Module({
   imports: [
@@ -9,6 +18,25 @@ import { AppService } from './app.service';
       envFilePath: '.env',
       isGlobal: true,
     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+
+      // Use useFactory, useClass, or useExisting
+      // to configure the ConnectionOptions.
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get<string>(DB_HOST),
+        port: +configService.get<number>(DB_PORT),
+        username: configService.get(DB_USER),
+        password: configService.get(DB_PASSWORD),
+        database: configService.get(DB_DATABASE),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true,
+        logging: false,
+      }),
+      inject: [ConfigService],
+    }),
+    ProductoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

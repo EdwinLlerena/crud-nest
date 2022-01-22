@@ -5,7 +5,7 @@ import { SERSERVER_PORT } from './config/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService= app.get(ConfigService);
+  const configService = app.get(ConfigService);
   const port = +configService.get<number>(SERSERVER_PORT) || 3000;
   await app.listen(port);
   console.log(`listenin on port ${await app.getUrl()}`);
